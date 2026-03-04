@@ -28,6 +28,7 @@ const isTriggerNode = (node) => node?.data?.disallowIncoming || node?.data?.labe
 
 const WorkflowBuilder = () => {
     const reactFlowWrapper = useRef(null);
+    const [savedViewport, setSavedViewport] = React.useState(null);
     const [activeTab, setActiveTab] = React.useState('Workflow');
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -58,6 +59,20 @@ const WorkflowBuilder = () => {
             return valid.length === eds.length ? eds : valid;
         });
     }, [nodes, setEdges]);
+
+    const handleTabChange = useCallback((tab) => {
+        if (activeTab === 'Workflow' && reactFlowInstance) {
+            setSavedViewport(reactFlowInstance.getViewport());
+        }
+        setActiveTab(tab);
+    }, [activeTab, reactFlowInstance]);
+
+    const handleFlowInit = useCallback((instance) => {
+        setReactFlowInstance(instance);
+        if (savedViewport) {
+            instance.setViewport(savedViewport);
+        }
+    }, [savedViewport]);
 
     const onNodeClick = useCallback((event, node) => {
         setSelectedNodeId(node.id);
@@ -128,12 +143,11 @@ const WorkflowBuilder = () => {
             });
 
             setNodes((nds) => {
-                const maxStep = Math.max(...nds.map(n => n.data?.stepNumber || 0), 0);
                 const newNode = {
                     id: getId(),
                     type: nodeData.type,
                     position,
-                    data: { ...nodeData, stepNumber: maxStep + 1 },
+                    data: { ...nodeData },
                 };
                 return nds.concat(newNode);
             });
@@ -143,7 +157,7 @@ const WorkflowBuilder = () => {
 
     return (
         <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 selection:bg-primary/20">
-            <Header activeTab={activeTab} onTabChange={setActiveTab} />
+            <Header activeTab={activeTab} onTabChange={handleTabChange} />
             {activeTab === 'Workflow' ? (
                 <div className="relative flex-1 min-h-0" ref={reactFlowWrapper}>
                     <ReactFlow
@@ -152,7 +166,7 @@ const WorkflowBuilder = () => {
                         onNodesChange={onNodesChange}
                         onEdgesChange={onEdgesChange}
                         onConnect={onConnect}
-                        onInit={setReactFlowInstance}
+                        onInit={handleFlowInit}
                         onDrop={onDrop}
                         onDragOver={onDragOver}
                         onNodeClick={onNodeClick}
@@ -164,10 +178,10 @@ const WorkflowBuilder = () => {
                             markerEnd: undefined,
                             interactionWidth: 28,
                         }}
-                        fitView
+                        fitView={!savedViewport}
                         proOptions={{ hideAttribution: true }}
                         className="bg-slate-50"
-                        defaultViewport={{ x: 0, y: 0, zoom: 1.5 }}
+                        defaultViewport={savedViewport || { x: 0, y: 0, zoom: 1.5 }}
                     >
                         <Background color="#e2e8f0" gap={16} size={1} />
                     </ReactFlow>

@@ -11,7 +11,7 @@ import {
     GitBranch, Route, Layers, ShieldAlert,
     SearchCheck, ListChecks, FileCheck, CalendarClock,
     Calculator, Clock,
-    Copy, Clipboard, RefreshCw, SkipForward, Pin, Eye, EyeOff, Trash2,
+    Copy, Eye, EyeOff, Trash2,
 } from 'lucide-react';
 import { nodeConfigs } from './nodeConfigs';
 
@@ -55,12 +55,11 @@ const CustomNode = ({ id, data, selected }) => {
     const [resultsOpen, setResultsOpen] = useState(false);
     const [stickyVisible, setStickyVisible] = useState(true);
     const menuRef = useRef(null);
-    const { getNode, getNodes, addNodes, deleteElements } = useReactFlow();
+    const { getNode, addNodes, deleteElements } = useReactFlow();
 
     const Icon = iconMap[data.icon] || File;
     const color = data.categoryColor || FALLBACK_COLOR;
     const config = nodeConfigs[data.label];
-    const stepNumber = data.stepNumber || 1;
     const disallowIncoming = data.disallowIncoming || data.label === 'Trigger';
 
     const canvasTags = useMemo(() => {
@@ -76,10 +75,6 @@ const CustomNode = ({ id, data, selected }) => {
 
     const menuItems = useMemo(() => [
         { label: 'Duplicate', icon: Copy, action: 'duplicate' },
-        { label: 'Copy', icon: Clipboard, action: 'copy' },
-        { label: 'Replace node', icon: RefreshCw, action: 'replace' },
-        { label: 'Skip node', icon: SkipForward, action: 'skip' },
-        { label: 'Pin output', icon: Pin, action: 'pin' },
         {
             label: stickyVisible ? 'Hide Sticky Note' : 'Show Sticky Note',
             icon: stickyVisible ? EyeOff : Eye,
@@ -96,8 +91,8 @@ const CustomNode = ({ id, data, selected }) => {
                 setMenuOpen(false);
             }
         };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
+        document.addEventListener('mousedown', handler, true);
+        return () => document.removeEventListener('mousedown', handler, true);
     }, [menuOpen]);
 
     const handleMenuAction = (action) => (e) => {
@@ -110,13 +105,11 @@ const CustomNode = ({ id, data, selected }) => {
             case 'duplicate': {
                 const node = getNode(id);
                 if (!node) return;
-                const allNodes = getNodes();
-                const maxStep = Math.max(...allNodes.map(n => n.data?.stepNumber || 0), 0);
                 addNodes({
                     ...node,
                     id: `dndnode_${Date.now()}`,
                     position: { x: node.position.x + 50, y: node.position.y + 50 },
-                    data: { ...node.data, stepNumber: maxStep + 1 },
+                    data: { ...node.data },
                     selected: false,
                 });
                 break;
@@ -129,7 +122,7 @@ const CustomNode = ({ id, data, selected }) => {
 
     return (
         <div className="relative w-72">
-            {/* Step label / sticky note above the card */}
+            {/* Sticky note above the card */}
             {stickyVisible && (
                 <div
                     className="absolute bottom-full left-0 right-0 mb-2 px-4 py-2.5 rounded-lg border border-l-[3px]"
@@ -140,13 +133,26 @@ const CustomNode = ({ id, data, selected }) => {
                     }}
                 >
                     <h4 className="text-xs font-bold text-slate-700">
-                        Step {stepNumber}: {data.label}
+                        {data.label}
                     </h4>
-                    {(config?.subtitle || data.description) && (
-                        <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
-                            {config?.subtitle || data.description}
-                        </p>
-                    )}
+                    {(() => {
+                        const activeConfigs = canvasTags.filter(t => !t.isDefault);
+                        if (activeConfigs.length > 0) {
+                            return (
+                                <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                    {activeConfigs.map(t => t.label).join(' · ')}
+                                </p>
+                            );
+                        }
+                        if (config?.subtitle || data.description) {
+                            return (
+                                <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                    {config?.subtitle || data.description}
+                                </p>
+                            );
+                        }
+                        return null;
+                    })()}
                 </div>
             )}
 

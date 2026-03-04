@@ -9,13 +9,12 @@ const LOGIN_STORAGE_KEY = 'regunaut-login-unlocked';
 export default function Home() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(null);
 
   useEffect(() => {
     const storedUnlock = window.localStorage.getItem(LOGIN_STORAGE_KEY);
-    if (storedUnlock === 'true') {
-      setIsUnlocked(true);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- standard pattern: read browser-only state on mount
+    setIsUnlocked(storedUnlock === 'true');
   }, []);
 
   const handleSubmit = (event) => {
@@ -30,6 +29,10 @@ export default function Home() {
 
     setError('Wrong password, try again.');
   };
+
+  if (isUnlocked === null) {
+    return null;
+  }
 
   if (isUnlocked) {
     return <WorkflowBuilder />;
