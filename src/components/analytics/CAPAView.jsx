@@ -22,8 +22,8 @@ export const CAPAView = ({ capaItems }) => {
     }).length;
 
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                     { title: 'Open CAPA Items', value: openCount, detail: 'Requiring corrective action' },
                     { title: 'Overdue', value: overdueCount, detail: 'Past due date' },
@@ -44,8 +44,8 @@ export const CAPAView = ({ capaItems }) => {
             </div>
 
             {capaItems.length > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                    <h3 className="text-sm font-medium text-slate-600 mb-3">CAPA by status</h3>
+                <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-sm font-medium text-slate-600 mb-4">CAPA by status</h3>
                     <CAPAStatusChart capaItems={capaItems} />
                 </div>
             )}

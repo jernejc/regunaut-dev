@@ -18,8 +18,8 @@ const formatDate = (iso) => {
 
 export const RunsView = ({ runs, onViewAuditTrail }) => {
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 {[
                     {
                         title: 'Runs',
@@ -57,13 +57,13 @@ export const RunsView = ({ runs, onViewAuditTrail }) => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                    <h3 className="text-sm font-medium text-slate-600 mb-3">Runs by status</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-sm font-medium text-slate-600 mb-4">Runs by status</h3>
                     <StatusBreakdownChart runs={runs} />
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                    <h3 className="text-sm font-medium text-slate-600 mb-3">Runs over time</h3>
+                <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-sm font-medium text-slate-600 mb-4">Runs over time</h3>
                     <RunsOverTimeChart />
                 </div>
             </div>
@@ -102,25 +102,25 @@ export const RunsView = ({ runs, onViewAuditTrail }) => {
                     <table className="w-full min-w-[1000px] text-sm">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-200 text-left text-slate-600">
-                                <th className="px-4 py-2.5 font-medium">Run ID</th>
-                                <th className="px-4 py-2.5 font-medium">Case ID</th>
-                                <th className="px-4 py-2.5 font-medium">Document Type</th>
-                                <th className="px-4 py-2.5 font-medium">Jurisdiction</th>
-                                <th className="px-4 py-2.5 font-medium">
+                                <th className="px-5 py-3 font-medium">Run ID</th>
+                                <th className="px-5 py-3 font-medium">Case ID</th>
+                                <th className="px-5 py-3 font-medium">Document Type</th>
+                                <th className="px-5 py-3 font-medium">Jurisdiction</th>
+                                <th className="px-5 py-3 font-medium">
                                     <span className="inline-flex items-center gap-1.5">
                                         Created
                                         <ArrowUpDown size={12} />
                                     </span>
                                 </th>
-                                <th className="px-4 py-2.5 font-medium">
+                                <th className="px-5 py-3 font-medium">
                                     <span className="inline-flex items-center gap-1.5">
                                         Status
                                         <ArrowUpDown size={12} />
                                     </span>
                                 </th>
-                                <th className="px-4 py-2.5 font-medium">Conf.</th>
-                                <th className="px-4 py-2.5 font-medium">Last Modified By</th>
-                                <th className="px-4 py-2.5 font-medium">Actions</th>
+                                <th className="px-5 py-3 font-medium">Conf.</th>
+                                <th className="px-5 py-3 font-medium">Last Modified By</th>
+                                <th className="px-5 py-3 font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -129,8 +129,8 @@ export const RunsView = ({ runs, onViewAuditTrail }) => {
                                     key={row.runId}
                                     className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50"
                                 >
-                                    <td className="px-4 py-3 font-medium text-text">{row.runId}</td>
-                                    <td className="px-4 py-3 text-slate-600">
+                                    <td className="px-5 py-3.5 font-medium text-text">{row.runId}</td>
+                                    <td className="px-5 py-3.5 text-slate-600">
                                         {row.caseId ? (
                                             <a
                                                 href="#"
@@ -143,21 +143,21 @@ export const RunsView = ({ runs, onViewAuditTrail }) => {
                                             '—'
                                         )}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-600">{row.documentType}</td>
-                                    <td className="px-4 py-3 text-slate-600">{row.jurisdiction}</td>
-                                    <td className="px-4 py-3 text-slate-600">
+                                    <td className="px-5 py-3.5 text-slate-600">{row.documentType}</td>
+                                    <td className="px-5 py-3.5 text-slate-600">{row.jurisdiction}</td>
+                                    <td className="px-5 py-3.5 text-slate-600">
                                         {formatDate(row.created)}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-5 py-3.5">
                                         <StatusBadge status={row.status} />
                                     </td>
-                                    <td className="px-4 py-3 text-slate-600">
+                                    <td className="px-5 py-3.5 text-slate-600">
                                         {row.confidence != null ? `${row.confidence}%` : '—'}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-600 text-xs">
+                                    <td className="px-5 py-3.5 text-slate-600 text-xs">
                                         {row.lastModifiedBy}
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-5 py-3.5">
                                         <div className="flex items-center gap-1">
                                             <button
                                                 type="button"

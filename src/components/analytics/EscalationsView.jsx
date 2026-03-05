@@ -33,8 +33,8 @@ export const EscalationsView = ({ escalations, onInitiateCAPA }) => {
     const resolvedToday = 0; // mock
 
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                     { title: 'Open Escalations', value: openCount, detail: 'Awaiting action' },
                     { title: 'Overdue', value: overdueCount, detail: '>24h without response' },
@@ -56,8 +56,8 @@ export const EscalationsView = ({ escalations, onInitiateCAPA }) => {
             </div>
 
             {escalations.length > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                    <h3 className="text-sm font-medium text-slate-600 mb-3">Escalations by reason</h3>
+                <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-sm font-medium text-slate-600 mb-4">Escalations by reason</h3>
                     <EscalationReasonsChart escalations={escalations} />
                 </div>
             )}

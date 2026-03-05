@@ -31,8 +31,8 @@ export const AuditTrailView = ({ auditEvents, onExport }) => {
     const actors = [...new Set(auditEvents.map((e) => e.actor))];
 
     return (
-        <div className="space-y-3">
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <div className="space-y-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-5">
                 <p className="text-sm text-slate-600">
                     Immutable audit log — 21 CFR Part 11 / EU Annex 11 compliant. Records who, what, when, and why for all workflow events.
                 </p>

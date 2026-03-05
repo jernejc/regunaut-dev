@@ -19,7 +19,7 @@ export const StatusBreakdownChart = ({ runs }) => {
     const data = Object.entries(byStatus).map(([name, value]) => ({ name, value }));
 
     return (
-        <div className="h-[200px] w-full">
+        <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -47,7 +47,7 @@ const DAILY_RUNS = [
 
 export const RunsOverTimeChart = () => {
     return (
-        <div className="h-[200px] w-full">
+        <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={DAILY_RUNS} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -75,7 +75,7 @@ export const EscalationReasonsChart = ({ escalations }) => {
     if (data.length === 0) return null;
 
     return (
-        <div className="h-[160px] w-full">
+        <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -99,7 +99,7 @@ export const CAPAStatusChart = ({ capaItems }) => {
     if (data.length === 0) return null;
 
     return (
-        <div className="h-[160px] w-full">
+        <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />

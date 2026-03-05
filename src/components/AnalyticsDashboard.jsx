@@ -20,9 +20,9 @@ const AnalyticsDashboard = ({
     const [dateRange, setDateRange] = useState('7d');
 
     return (
-        <section className="flex-1 min-h-0 overflow-auto bg-slate-50 p-4 flex flex-col">
-            <div className="w-full max-w-[1100px] mx-auto flex-1 flex flex-col min-w-0">
-                <div className="flex items-center justify-between gap-3 mb-3">
+        <section className="flex-1 min-h-0 overflow-auto bg-slate-50 p-6 flex flex-col">
+            <div className="w-full flex-1 flex flex-col min-w-0">
+                <div className="flex items-center justify-between gap-3 mb-4">
                     <DateRangePicker
                         value={dateRange}
                         onChange={setDateRange}
@@ -32,7 +32,7 @@ const AnalyticsDashboard = ({
 
                 <div className="flex-1 flex flex-col min-h-0 border border-slate-200 rounded-xl bg-white overflow-hidden">
                     <AnalyticsTabs activeTab={activeSubTab} onTabChange={setActiveSubTab} />
-                    <div className="flex-1 overflow-auto p-4 bg-slate-50">
+                    <div className="flex-1 overflow-auto p-6 bg-slate-50">
                         {activeSubTab === 'runs' && (
                             <RunsView
                                 runs={runs}
