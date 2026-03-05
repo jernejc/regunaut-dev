@@ -7,13 +7,18 @@ import {
     Send, Bell,
     Sparkles, CheckSquare,
     FileSearch, FileText, FolderOpen, ShieldCheck, BookOpen, ClipboardList,
-    GitBranch, Route, Layers, ShieldAlert,
+    GitBranch, GitFork, Route, Layers, ShieldAlert,
     SearchCheck, ListChecks, FileCheck, CalendarClock,
     Calculator, Clock,
     Link2, ArrowDownToLine, Settings, ArrowUpFromLine, TriangleAlert, History,
+    ClipboardCheck, Database, Braces,
+    Mail, Smartphone, MessageSquare, Users,
+    CirclePlus, Pencil, Eye, List,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { nodeConfigs } from './nodeConfigs';
+import TeamsIcon from './icons/TeamsIcon';
+import EmailIcon from './icons/EmailIcon';
 
 function labelToKey(label) {
     return label
@@ -32,9 +37,12 @@ const iconMap = {
     send: Send, bell: Bell, sparkles: Sparkles, checkSquare: CheckSquare,
     fileSearch: FileSearch, fileText: FileText, folderOpen: FolderOpen,
     shieldCheck: ShieldCheck, bookOpen: BookOpen, clipboardList: ClipboardList,
-    gitBranch: GitBranch, route: Route, layers: Layers, shieldAlert: ShieldAlert,
+    gitBranch: GitBranch, gitFork: GitFork, route: Route, layers: Layers, shieldAlert: ShieldAlert,
     searchCheck: SearchCheck, listChecks: ListChecks, fileCheck: FileCheck,
     calendarClock: CalendarClock, calculator: Calculator, clock: Clock,
+    clipboardCheck: ClipboardCheck, database: Database,
+    mail: Mail, emailBrand: EmailIcon, teamsBrand: TeamsIcon, smartphone: Smartphone, messageSquare: MessageSquare, users: Users,
+    circlePlus: CirclePlus, pencil: Pencil, eye: Eye, list: List,
 };
 
 // ---------------------------------------------------------------------------
@@ -242,6 +250,13 @@ const sectionIconMap = {
     'Settings': Settings,
     'Output': ArrowUpFromLine,
     'Outputs': ArrowUpFromLine,
+    'Output Schema': Braces,
+    'Validation': ShieldCheck,
+    'Response Handling': Clock,
+    'Condition': GitFork,
+    'Routing': Route,
+    'Cases': Layers,
+    'Fallback': ShieldAlert,
     'Escalation': TriangleAlert,
     'Run History': History,
 };
@@ -278,12 +293,23 @@ function Section({ title, hasRequired, defaultOpen = true, children }) {
 // ---------------------------------------------------------------------------
 
 const NodeDetailPanel = ({ node, onClose, onFieldChange }) => {
+    const data = node?.data;
+    const config = data ? nodeConfigs[data.label] : null;
+
+    const Icon = React.useMemo(() => {
+        if (!data) return File;
+        if (config?.iconOverrides) {
+            const { field, map } = config.iconOverrides;
+            const tag = config.canvasTags?.find(t => t.key === field);
+            const value = data[field] ?? tag?.defaultValue;
+            if (value && map[value]) return iconMap[map[value]] || iconMap[data.icon] || File;
+        }
+        return iconMap[data.icon] || File;
+    }, [config, data]);
+
     if (!node) return null;
 
-    const { data } = node;
     const color = data.categoryColor || '#64748b';
-    const Icon = iconMap[data.icon] || File;
-    const config = nodeConfigs[data.label];
 
     const handleFieldChange = (dataKey, value) => {
         onFieldChange?.(node.id, dataKey, value);

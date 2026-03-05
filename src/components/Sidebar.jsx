@@ -7,15 +7,20 @@ import {
     Send, Bell,
     Sparkles, CheckSquare,
     FileSearch, FileText, FolderOpen, ShieldCheck, BookOpen, ClipboardList,
-    GitBranch, Route, Layers, ShieldAlert,
+    GitBranch, GitFork, Route, Layers, ShieldAlert,
     SearchCheck, ListChecks, FileCheck, CalendarClock,
     Calculator, Clock,
     Database, Server, FlaskConical, Microscope, Archive,
     Globe, Scale, Building2,
     Radio, Pill, BookMarked, HeartPulse, TestTubes,
     Lock, Download, Upload, BriefcaseBusiness, AppWindow, Code2, Wrench,
+    ClipboardCheck,
+    Mail, Smartphone, MessageSquare, Users,
+    CirclePlus, Pencil, Eye, List,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import TeamsIcon from './icons/TeamsIcon';
+import EmailIcon from './icons/EmailIcon';
 
 const iconMap = {
     type: Type,
@@ -36,6 +41,7 @@ const iconMap = {
     gitBranch: GitBranch,
     route: Route,
     layers: Layers,
+    gitFork: GitFork,
     shieldAlert: ShieldAlert,
     searchCheck: SearchCheck,
     listChecks: ListChecks,
@@ -57,12 +63,24 @@ const iconMap = {
     heartPulse: HeartPulse,
     testTubes: TestTubes,
     lock: Lock,
+    clipboardCheck: ClipboardCheck,
+    mail: Mail,
+    emailBrand: EmailIcon,
+    teamsBrand: TeamsIcon,
+    smartphone: Smartphone,
+    messageSquare: MessageSquare,
+    users: Users,
+    circlePlus: CirclePlus,
+    pencil: Pencil,
+    eye: Eye,
+    list: List,
 };
 
 const groupIconMap = {
     Inputs: Download,
     Outputs: Upload,
     'Core Nodes': BriefcaseBusiness,
+    Logic: GitFork,
     'Document Intelligence': AppWindow,
     Classifiers: Code2,
     Validators: Wrench,
@@ -108,6 +126,17 @@ export const nodeGroups = [
         nodes: [
             { type: 'custom', label: 'Ask AI', icon: 'sparkles', description: 'Query an LLM for structured output' },
             { type: 'custom', label: 'Review / Approve', icon: 'checkSquare', description: 'Human-in-the-loop review step' },
+            { type: 'custom', label: 'Regunaut API', icon: 'database', description: 'Create, update, or query case records' },
+        ],
+    },
+    {
+        name: 'Logic',
+        category: 'general',
+        color: '#06b6d4',
+        description: 'Control flow branching and routing',
+        nodes: [
+            { type: 'custom', label: 'If/Else', icon: 'gitFork', description: 'Conditional true/false branching' },
+            { type: 'custom', label: 'Switch', icon: 'route', description: 'Multi-way routing by value or rules' },
         ],
     },
     {
@@ -122,6 +151,7 @@ export const nodeGroups = [
             { type: 'custom', label: 'PSUR/PBRER', icon: 'shieldCheck', description: 'Periodic safety report parser' },
             { type: 'custom', label: 'RMP', icon: 'bookOpen', description: 'Risk management plan parser' },
             { type: 'custom', label: 'IND/CTA', icon: 'fileSearch', description: 'Clinical trial application parser' },
+            { type: 'custom', label: 'CTD Checklist Generator', icon: 'clipboardCheck', description: 'Generate CTD document checklist' },
         ],
     },
     {

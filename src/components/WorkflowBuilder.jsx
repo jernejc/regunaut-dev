@@ -18,8 +18,12 @@ import CanvasToolbar from './CanvasToolbar';
 import NodeDetailPanel from './NodeDetailPanel';
 import AnalyseDocumentModal from './AnalyseDocumentModal';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import { nodeConfigs } from './nodeConfigs';
+import { defaultNodes, defaultEdges } from './defaultWorkflow';
+import { runs, escalations, auditEvents, capaItems } from './analytics/mockData';
+import { exportFlowReport, exportAuditLog } from './analytics/exportUtils';
 
-let id = 0;
+let id = 100;
 const getId = () => `dndnode_${id++}`;
 
 const nodeTypes = { custom: CustomNode };
@@ -30,8 +34,8 @@ const WorkflowBuilder = () => {
     const reactFlowWrapper = useRef(null);
     const [savedViewport, setSavedViewport] = React.useState(null);
     const [activeTab, setActiveTab] = React.useState('Workflow');
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
+    const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
     const [reactFlowInstance, setReactFlowInstance] = React.useState(null);
     const [activeModalNode, setActiveModalNode] = React.useState(null);
     const [selectedNodeId, setSelectedNodeId] = React.useState(null);
@@ -109,6 +113,13 @@ const WorkflowBuilder = () => {
             if (isTriggerNode(targetNode)) {
                 return;
             }
+            let label;
+            if (params.sourceHandle) {
+                const sourceNode = nodes.find((node) => node.id === params.source);
+                const cfg = sourceNode && nodeConfigs[sourceNode.data?.label];
+                const handleDef = cfg?.handles?.sources?.find(h => h.id === params.sourceHandle);
+                if (handleDef) label = handleDef.label;
+            }
             setEdges((eds) =>
                 addEdge(
                     {
@@ -116,6 +127,7 @@ const WorkflowBuilder = () => {
                         type: 'smoothstep',
                         style: EDGE_STYLE,
                         markerEnd: undefined,
+                        ...(label ? { label } : {}),
                     },
                     eds
                 )
@@ -155,9 +167,17 @@ const WorkflowBuilder = () => {
         [reactFlowInstance, setNodes],
     );
 
+    const handleFlowReport = () => exportFlowReport(runs, 'Untitled Workflow');
+    const handleDownloadLogs = () => exportAuditLog(auditEvents, 'csv');
+
     return (
         <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 selection:bg-primary/20">
-            <Header activeTab={activeTab} onTabChange={handleTabChange} />
+            <Header
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                onFlowReport={handleFlowReport}
+                onDownloadLogs={handleDownloadLogs}
+            />
             {activeTab === 'Workflow' ? (
                 <div className="relative flex-1 min-h-0" ref={reactFlowWrapper}>
                     <ReactFlow
@@ -219,7 +239,13 @@ const WorkflowBuilder = () => {
                     )}
                 </div>
             ) : (
-                <AnalyticsDashboard />
+                <AnalyticsDashboard
+                    runs={runs}
+                    escalations={escalations}
+                    auditEvents={auditEvents}
+                    capaItems={capaItems}
+                    onExportAuditLog={(filtered) => exportAuditLog(filtered || auditEvents, 'csv')}
+                />
             )}
         </div>
     );

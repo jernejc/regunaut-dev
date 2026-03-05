@@ -109,7 +109,13 @@ const filesNode = {
 };
 
 const triggerNode = {
-    subtitle: 'Start the workflow based on an external event or schedule.',
+    subtitle: 'Start the workflow based on an external event or schedule. Validates incoming data and routes to Accepted or Rejected.',
+    handles: {
+        sources: [
+            { id: 'accepted', label: 'Accepted' },
+            { id: 'rejected', label: 'Rejected' },
+        ],
+    },
     canvasTags: [
         { key: 'triggerType', defaultValue: 'webhook', options: [
             { value: 'webhook', label: 'Webhook' },
@@ -133,6 +139,17 @@ const triggerNode = {
                     { value: 'api', label: 'API call' },
                 ]},
                 { type: 'info', label: 'Webhook URL', value: 'Generated after publishing' },
+            ],
+        },
+        {
+            title: 'Validation', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Require Attachment', defaultChecked: false },
+                { type: 'select', label: 'Required Format', options: [
+                    { value: 'any', label: 'Any' },
+                    { value: 'pdf', label: 'PDF' },
+                    { value: 'docx', label: 'Word (.docx)' },
+                ]},
+                { type: 'text', label: 'Reject Message', placeholder: 'Please resubmit with the required attachment' },
             ],
         },
     ],
@@ -243,7 +260,17 @@ const outputNode = {
 };
 
 const sendNotificationNode = {
-    subtitle: 'Send an email, SMS, or chat notification when a step completes.',
+    subtitle: 'Send an email, SMS, or chat notification. Optionally await a response with timeout and escalation.',
+    iconOverrides: {
+        field: 'channel',
+        map: { email: 'emailBrand', sms: 'smartphone', slack: 'messageSquare', teams: 'teamsBrand' },
+    },
+    handles: {
+        sources: [
+            { id: 'done', label: 'Done' },
+            { id: 'timedOut', label: 'Timed Out' },
+        ],
+    },
     canvasTags: [
         { key: 'channel', defaultValue: 'email', options: [
             { value: 'email', label: 'Email' },
@@ -276,6 +303,17 @@ const sendNotificationNode = {
                 { type: 'text', label: 'Subject', placeholder: 'Workflow notification' },
                 { type: 'text', label: 'Message Template', placeholder: 'Step {{stepName}} completed...' },
                 { type: 'toggle', label: 'Attach Results', defaultChecked: false },
+            ],
+        },
+        {
+            title: 'Response Handling', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Await Response', defaultChecked: false },
+                { type: 'text', label: 'Timeout', placeholder: 'e.g. 48' },
+                { type: 'select', label: 'Timeout Unit', options: [
+                    { value: 'hours', label: 'Hours' },
+                    { value: 'days', label: 'Days' },
+                ]},
+                { type: 'toggle', label: 'Resume with Response Data', defaultChecked: true },
             ],
         },
     ],
@@ -359,12 +397,71 @@ const reviewApproveNode = {
     ],
 };
 
+const regunautApiNode = {
+    subtitle: 'Create, update, or query case records in Regunaut — the central project-plan store for all downstream tasks.',
+    iconOverrides: {
+        field: 'operation',
+        map: { create: 'circlePlus', update: 'pencil', get: 'eye', list: 'list' },
+    },
+    canvasTags: [
+        { key: 'operation', defaultValue: 'create', options: [
+            { value: 'create', label: 'Create case' },
+            { value: 'update', label: 'Update case' },
+            { value: 'get', label: 'Get case' },
+            { value: 'list', label: 'List cases' },
+        ]},
+    ],
+    sections: [
+        {
+            title: 'Connection', defaultOpen: true, fields: [
+                { type: 'text', label: 'Regunaut Instance', placeholder: 'https://app.regunaut.com' },
+                { type: 'select', label: 'Credential', options: [
+                    { value: '', label: 'Select credential...' },
+                    { value: 'api-key', label: 'API Key' },
+                    { value: 'oauth', label: 'OAuth 2.0' },
+                ]},
+            ],
+        },
+        {
+            title: 'Inputs', defaultOpen: true, fields: [
+                { type: 'select', label: 'Operation', options: [
+                    { value: 'create', label: 'Create case' },
+                    { value: 'update', label: 'Update case' },
+                    { value: 'get', label: 'Get case' },
+                    { value: 'list', label: 'List cases' },
+                ], required: true },
+                { type: 'expression', label: 'Case ID', placeholder: '{{ $json.case_id }}' },
+                { type: 'expression', label: 'Payload', placeholder: '{{ { title: $json.change_description, tasks: $json.tasks } }}' },
+            ],
+        },
+        {
+            title: 'Settings', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Retry on Failure', defaultChecked: true },
+                { type: 'text', label: 'Timeout (seconds)', placeholder: '30', defaultValue: '30' },
+            ],
+        },
+        {
+            title: 'Output', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Return Full Record', defaultChecked: true },
+                { type: 'toggle', label: 'Return case_id Only', defaultChecked: false },
+                { type: 'info', label: 'Output Schema', value: 'case_id · status · created_at · updated_at' },
+            ],
+        },
+    ],
+};
+
 // ---------------------------------------------------------------------------
 // Document Intelligence group
 // ---------------------------------------------------------------------------
 
 const ccFormNode = {
-    subtitle: 'Upload a Change Control form. Extracts variation type, regulatory impact, and action tasks — regardless of template or language.',
+    subtitle: 'Upload a Change Control form. Extracts variation type, regulatory impact, and action tasks. Routes to Review when confidence is below threshold.',
+    handles: {
+        sources: [
+            { id: 'passed', label: 'Passed' },
+            { id: 'review', label: 'Review' },
+        ],
+    },
     canvasTags: [
         { key: 'jurisdiction', defaultValue: '', options: JURISDICTIONS },
         { key: 'extractionMode', defaultValue: 'full', options: [
@@ -401,6 +498,16 @@ const ccFormNode = {
             title: 'Output', defaultOpen: false, fields: [
                 { type: 'toggle', label: 'Structured JSON Output', defaultChecked: true },
                 { type: 'toggle', label: 'Plain-language Summary', defaultChecked: true },
+            ],
+        },
+        {
+            title: 'Output Schema', defaultOpen: false, fields: [
+                { type: 'info', label: 'change_description', value: 'Plain-text summary of the change' },
+                { type: 'info', label: 'regulatory_impact', value: 'Impact level: none / minor / major / critical' },
+                { type: 'info', label: 'affected_products', value: 'Array of product names and MA numbers' },
+                { type: 'info', label: 'implementation_date', value: 'ISO date the change takes effect' },
+                { type: 'info', label: 'confidence_overall', value: '0–100 extraction confidence score' },
+                { type: 'info', label: 'tasks', value: 'Array of { description, department, deadline }' },
             ],
         },
     ],
@@ -630,6 +737,57 @@ const indCtaNode = {
     ],
 };
 
+const ctdChecklistGeneratorNode = {
+    subtitle: 'Generate a CTD document checklist based on variation type and jurisdiction — tells you exactly which documents to prepare.',
+    canvasTags: [
+        { key: 'ctdEdition', defaultValue: 'latest', options: [
+            { value: 'latest', label: 'Latest' },
+            { value: 'ich-m4', label: 'ICH M4' },
+        ]},
+        { key: 'format', defaultValue: 'checklist', options: [
+            { value: 'checklist', label: 'Checklist' },
+            { value: 'table', label: 'Table' },
+            { value: 'json', label: 'JSON' },
+        ]},
+    ],
+    sections: [
+        {
+            title: 'Connection', defaultOpen: true, fields: [
+                AI_PROVIDER,
+            ],
+        },
+        {
+            title: 'Inputs', defaultOpen: true, fields: [
+                { type: 'expression', label: 'Variation Type', placeholder: '{{ $json.variation_type }}', required: true },
+                { type: 'multiselect', label: 'Jurisdiction', options: JURISDICTIONS, required: true },
+                { type: 'select', label: 'Product Type', options: PRODUCT_TYPES },
+                { type: 'expression', label: 'Change Description', placeholder: '{{ $json.change_description }}' },
+            ],
+        },
+        {
+            title: 'Settings', defaultOpen: true, fields: [
+                { type: 'select', label: 'CTD Edition', options: [
+                    { value: 'latest', label: 'Latest (auto-update)' },
+                    { value: 'ich-m4', label: 'ICH M4' },
+                ]},
+                { type: 'toggle', label: 'Include Optional Documents', defaultChecked: false },
+                { type: 'select', label: 'Output Format', options: [
+                    { value: 'checklist', label: 'Checklist' },
+                    { value: 'table', label: 'Table' },
+                    { value: 'json', label: 'JSON' },
+                ]},
+            ],
+        },
+        {
+            title: 'Output', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Checklist Items', defaultChecked: true },
+                { type: 'toggle', label: 'Gap Indicators', defaultChecked: true },
+                { type: 'toggle', label: 'Estimated Effort per Document', defaultChecked: false },
+            ],
+        },
+    ],
+};
+
 // ---------------------------------------------------------------------------
 // Classifiers group
 // ---------------------------------------------------------------------------
@@ -672,7 +830,18 @@ const variationTypeClassifierNode = {
         {
             title: 'Output', defaultOpen: false, fields: [
                 { type: 'toggle', label: 'Include Regulatory Basis', defaultChecked: true },
+                { type: 'toggle', label: 'Include Prior Approval Flag', defaultChecked: true },
+                { type: 'toggle', label: 'Include Submission Deadline', defaultChecked: true },
                 { type: 'toggle', label: 'Include Confidence Score', defaultChecked: true },
+            ],
+        },
+        {
+            title: 'Output Schema', defaultOpen: false, fields: [
+                { type: 'info', label: 'variation_type', value: 'e.g. "Type IA", "Type IB", "Type II"' },
+                { type: 'info', label: 'regulatory_basis', value: 'Legal basis reference per jurisdiction' },
+                { type: 'info', label: 'requires_prior_approval', value: 'Boolean — true if prior approval needed' },
+                { type: 'info', label: 'submission_deadline', value: 'ISO date — latest permissible submission' },
+                { type: 'info', label: 'confidence', value: '0–100 classification confidence score' },
             ],
         },
     ],
@@ -1081,6 +1250,88 @@ const regulatoryFeeEstimatorNode = {
 
 
 // ---------------------------------------------------------------------------
+// Logic group
+// ---------------------------------------------------------------------------
+
+const ifElseNode = {
+    subtitle: 'Evaluate a condition and route data to the True or False output.',
+    handles: {
+        sources: [
+            { id: 'true', label: 'True' },
+            { id: 'false', label: 'False' },
+        ],
+    },
+    canvasTags: [
+        { key: 'mode', defaultValue: 'expression', options: [
+            { value: 'expression', label: 'Expression' },
+            { value: 'value', label: 'Value check' },
+        ]},
+    ],
+    sections: [
+        {
+            title: 'Condition', defaultOpen: true, fields: [
+                { type: 'select', label: 'Mode', options: [
+                    { value: 'expression', label: 'Expression — evaluate a JS expression' },
+                    { value: 'value', label: 'Value check — compare a field' },
+                ]},
+                { type: 'expression', label: 'Condition', placeholder: '{{ $json.confidence > 70 }}', required: true },
+            ],
+        },
+        {
+            title: 'Settings', defaultOpen: false, fields: [
+                { type: 'toggle', label: 'Strict Type Checking', defaultChecked: false },
+                { type: 'toggle', label: 'Pass Input Data to Both Outputs', defaultChecked: true },
+            ],
+        },
+    ],
+};
+
+const switchNode = {
+    subtitle: 'Route data to different outputs based on a field value or set of rules.',
+    handles: {
+        sources: [
+            { id: 'case-1', label: '1' },
+            { id: 'case-2', label: '2' },
+            { id: 'case-3', label: '3' },
+            { id: 'fallback', label: '⌀' },
+        ],
+    },
+    canvasTags: [
+        { key: 'mode', defaultValue: 'rules', options: [
+            { value: 'rules', label: 'Rules' },
+            { value: 'expression', label: 'Expression value' },
+        ]},
+    ],
+    sections: [
+        {
+            title: 'Routing', defaultOpen: true, fields: [
+                { type: 'select', label: 'Mode', options: [
+                    { value: 'rules', label: 'Match rules — evaluate per-case conditions' },
+                    { value: 'expression', label: 'Expression value — route by exact match' },
+                ]},
+                { type: 'expression', label: 'Routing Key', placeholder: '{{ $json.department }}', required: true },
+            ],
+        },
+        {
+            title: 'Cases', defaultOpen: true, fields: [
+                { type: 'text', label: 'Output 1', placeholder: 'e.g. RA' },
+                { type: 'text', label: 'Output 2', placeholder: 'e.g. CMC' },
+                { type: 'text', label: 'Output 3', placeholder: 'e.g. QA' },
+            ],
+        },
+        {
+            title: 'Fallback', defaultOpen: false, fields: [
+                { type: 'select', label: 'On No Match', options: [
+                    { value: 'fallback', label: 'Route to Fallback output' },
+                    { value: 'error', label: 'Throw error' },
+                    { value: 'ignore', label: 'Drop silently' },
+                ]},
+            ],
+        },
+    ],
+};
+
+// ---------------------------------------------------------------------------
 // Export the full map keyed by node label
 // ---------------------------------------------------------------------------
 
@@ -1099,6 +1350,7 @@ export const nodeConfigs = {
     // Core Nodes
     'Ask AI': askAiNode,
     'Review / Approve': reviewApproveNode,
+    'Regunaut API': regunautApiNode,
 
     // Document Intelligence
     'CC Form': ccFormNode,
@@ -1107,6 +1359,7 @@ export const nodeConfigs = {
     'PSUR/PBRER': psurPbrerNode,
     'RMP': rmpNode,
     'IND/CTA': indCtaNode,
+    'CTD Checklist Generator': ctdChecklistGeneratorNode,
 
     // Classifiers
     'Variation Type Classifier': variationTypeClassifierNode,
@@ -1123,4 +1376,8 @@ export const nodeConfigs = {
     // Calculators
     'Submission Deadline': submissionDeadlineNode,
     'Regulatory Fee Estimator': regulatoryFeeEstimatorNode,
+
+    // Logic
+    'If/Else': ifElseNode,
+    'Switch': switchNode,
 };

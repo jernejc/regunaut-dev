@@ -8,12 +8,17 @@ import {
     Send, Bell,
     Sparkles, CheckSquare,
     FileSearch, FileText, FolderOpen, ShieldCheck, BookOpen, ClipboardList,
-    GitBranch, Route, Layers, ShieldAlert,
+    GitBranch, GitFork, Route, Layers, ShieldAlert,
     SearchCheck, ListChecks, FileCheck, CalendarClock,
     Calculator, Clock,
     Copy, Eye, EyeOff, Trash2,
+    ClipboardCheck, Database,
+    Mail, Smartphone, MessageSquare, Users,
+    CirclePlus, Pencil, List,
 } from 'lucide-react';
 import { nodeConfigs } from './nodeConfigs';
+import TeamsIcon from './icons/TeamsIcon';
+import EmailIcon from './icons/EmailIcon';
 
 const iconMap = {
     type: Type,
@@ -34,6 +39,7 @@ const iconMap = {
     gitBranch: GitBranch,
     route: Route,
     layers: Layers,
+    gitFork: GitFork,
     shieldAlert: ShieldAlert,
     searchCheck: SearchCheck,
     listChecks: ListChecks,
@@ -41,6 +47,18 @@ const iconMap = {
     calendarClock: CalendarClock,
     calculator: Calculator,
     clock: Clock,
+    clipboardCheck: ClipboardCheck,
+    database: Database,
+    mail: Mail,
+    emailBrand: EmailIcon,
+    teamsBrand: TeamsIcon,
+    smartphone: Smartphone,
+    messageSquare: MessageSquare,
+    users: Users,
+    circlePlus: CirclePlus,
+    pencil: Pencil,
+    eye: Eye,
+    list: List,
 };
 
 const FALLBACK_COLOR = '#64748b';
@@ -53,14 +71,23 @@ function resolveTagLabel(tag, value) {
 const CustomNode = ({ id, data, selected }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [resultsOpen, setResultsOpen] = useState(false);
-    const [stickyVisible, setStickyVisible] = useState(true);
+    const [stickyVisible, setStickyVisible] = useState(false);
     const menuRef = useRef(null);
     const { getNode, addNodes, deleteElements } = useReactFlow();
 
-    const Icon = iconMap[data.icon] || File;
     const color = data.categoryColor || FALLBACK_COLOR;
     const config = nodeConfigs[data.label];
     const disallowIncoming = data.disallowIncoming || data.label === 'Trigger';
+
+    const Icon = useMemo(() => {
+        if (config?.iconOverrides) {
+            const { field, map } = config.iconOverrides;
+            const tag = config.canvasTags?.find(t => t.key === field);
+            const value = data[field] ?? tag?.defaultValue;
+            if (value && map[value]) return iconMap[map[value]] || iconMap[data.icon] || File;
+        }
+        return iconMap[data.icon] || File;
+    }, [config, data]);
 
     const canvasTags = useMemo(() => {
         if (!config?.canvasTags) return [];
@@ -164,10 +191,13 @@ const CustomNode = ({ id, data, selected }) => {
                 <div className="px-4 pt-3.5 pb-2">
                     <div className="flex items-center gap-2.5">
                         <div
-                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${color}15`, color }}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden"
                         >
-                            <Icon size={18} />
+                            {data.label === 'Regunaut API' ? (
+                                <img src="/regunaut_logo.jpeg" alt="Regunaut" className="w-6 h-6 object-contain" />
+                            ) : (
+                                <Icon size={24} style={{ color }} />
+                            )}
                         </div>
                         <h3 className="flex-1 min-w-0 text-sm font-semibold text-slate-900 truncate">
                             {data.label}
@@ -254,19 +284,70 @@ const CustomNode = ({ id, data, selected }) => {
                 </div>
             </div>
 
-            {/* Connection handles styled as + buttons */}
-            {!disallowIncoming && (
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-left-2.5 !rounded-full !shadow-sm"
-                />
-            )}
-            <Handle
-                type="source"
-                position={Position.Right}
-                className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-right-2.5 !rounded-full !shadow-sm"
-            />
+            {/* Connection handles */}
+            {(() => {
+                const multiTargets = config?.handles?.targets;
+                if (multiTargets) {
+                    const count = multiTargets.length;
+                    return multiTargets.map((h, i) => (
+                        <React.Fragment key={h.id}>
+                            <Handle
+                                type="target"
+                                position={Position.Left}
+                                id={h.id}
+                                style={{ top: `${((i + 1) / (count + 1)) * 100}%` }}
+                                className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-left-2.5 !rounded-full !shadow-sm"
+                            />
+                            <span
+                                className="absolute text-[9px] font-semibold text-slate-400 pointer-events-none select-none"
+                                style={{ left: 12, top: `calc(${((i + 1) / (count + 1)) * 100}% - 7px)` }}
+                            >
+                                {h.label}
+                            </span>
+                        </React.Fragment>
+                    ));
+                }
+                if (!disallowIncoming) {
+                    return (
+                        <Handle
+                            type="target"
+                            position={Position.Left}
+                            className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-left-2.5 !rounded-full !shadow-sm"
+                        />
+                    );
+                }
+                return null;
+            })()}
+            {(() => {
+                const multiSources = config?.handles?.sources;
+                if (multiSources) {
+                    const count = multiSources.length;
+                    return multiSources.map((h, i) => (
+                        <React.Fragment key={h.id}>
+                            <Handle
+                                type="source"
+                                position={Position.Right}
+                                id={h.id}
+                                style={{ top: `${((i + 1) / (count + 1)) * 100}%` }}
+                                className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-right-2.5 !rounded-full !shadow-sm"
+                            />
+                            <span
+                                className="absolute text-[9px] font-semibold text-slate-400 pointer-events-none select-none right-3"
+                                style={{ top: `calc(${((i + 1) / (count + 1)) * 100}% - 7px)` }}
+                            >
+                                {h.label}
+                            </span>
+                        </React.Fragment>
+                    ));
+                }
+                return (
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        className="handle-plus !w-5 !h-5 !bg-white !border !border-slate-200 !-right-2.5 !rounded-full !shadow-sm"
+                    />
+                );
+            })()}
         </div>
     );
 };

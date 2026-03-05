@@ -14,7 +14,12 @@ import { cn } from '../lib/utils';
 
 const navTabs = ['Workflow', 'Analytics'];
 
-export const Header = ({ activeTab = 'Workflow', onTabChange = () => {} }) => {
+export const Header = ({
+    activeTab = 'Workflow',
+    onTabChange = () => {},
+    onFlowReport,
+    onDownloadLogs,
+}) => {
     const [running, setRunning] = useState(false);
     const [status] = useState('Draft');
     const isAnalyticsView = activeTab === 'Analytics';
@@ -61,11 +66,17 @@ export const Header = ({ activeTab = 'Workflow', onTabChange = () => {} }) => {
             <div className="flex items-center gap-2 shrink-0">
                 {isAnalyticsView ? (
                     <>
-                        <button className="h-8 px-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <button
+                            onClick={() => onFlowReport?.()}
+                            className="h-8 px-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                        >
                             <FileText size={14} />
                             Flow Report
                         </button>
-                        <button className="h-8 px-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <button
+                            onClick={() => onDownloadLogs?.()}
+                            className="h-8 px-3 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                        >
                             <Download size={14} />
                             Download Logs
                         </button>
